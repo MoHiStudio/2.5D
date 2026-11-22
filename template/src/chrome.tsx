@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { AbsoluteFill, Sequence, delayRender, continueRender, interpolate, spring, staticFile, useCurrentFrame } from 'remotion';
+import { AbsoluteFill, Sequence, delayRender, continueRender, Easing, interpolate, spring, staticFile, useCurrentFrame } from 'remotion';
 import { C, FPS, SPRING, T, clamp } from './theme';
 import { CAPS, SCENE_TAGS, Cap } from './data';
 import { PAGE_NAME } from './brand';
@@ -21,8 +21,13 @@ export const useFonts = () => {
 // 540x960 design space scaled to 1080x1920, with slow push-in, fade-in, grain + vignette
 export const Stage: React.FC<{ dur: number; push?: number; children: React.ReactNode; bg?: string }> = ({ dur, push = 0.05, children, bg }) => {
   const f = useCurrentFrame();
-  const sc = 1 + push * (f / dur);
-  const op = interpolate(f, [0, 4], [0.55, 1], clamp);
+  const progress = interpolate(f, [0, Math.max(1, dur)], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+    easing: Easing.inOut(Easing.quad),
+  });
+  const sc = 1 + push * progress;
+  const op = interpolate(f, [0, 6], [0.55, 1], { ...clamp, easing: Easing.out(Easing.quad) });
   return (
     <AbsoluteFill style={{ background: bg ?? C.beige, opacity: op }}>
       <div style={{ position: 'absolute', inset: 0, transform: `scale(${sc})`, transformOrigin: '50% 58%' }}>
