@@ -12,6 +12,17 @@ export const mouthOpen = (who: string, t: number) => {
   return (RMS[Math.floor(t * 30)] ?? 0) > 0.2;
 };
 
+/** Approximate audio-reactive mouth pose. This is amplitude-driven, not phoneme recognition. */
+export const mouthShapeFor = (who: string, t: number): 'closed' | 'small' | 'wide' | 'round' => {
+  const windows = SPEAK[who] || [];
+  if (!windows.some(([a, b]) => t >= a && t <= b)) return 'closed';
+  const level = RMS[Math.max(0, Math.floor(t * FPS))] ?? 0;
+  if (level < 0.12) return 'closed';
+  if (level < 0.25) return 'small';
+  const phase = Math.floor(t * 7) % 4;
+  return phase === 0 ? 'round' : level > 0.48 ? 'wide' : 'small';
+};
+
 export type SP = { t0: number; dur: number };
 export const O = C.outline;
 
