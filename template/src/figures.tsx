@@ -8,7 +8,8 @@ export type PersonP = {
   x: number; y: number; s?: number; flip?: boolean; pose?: 'sit' | 'stand';
   skin: string; ear: string; shirt: string; pants: string; hair: string;
   long?: boolean; lungi?: string; glasses?: boolean; mustache?: string;
-  mouth?: boolean; smile?: boolean; sad?: boolean; blink?: boolean;
+  mouth?: boolean; mouthShape?: 'closed' | 'small' | 'wide' | 'round' | 'smile';
+  smile?: boolean; sad?: boolean; blink?: boolean; expression?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprised' | 'thinking'; gaze?: number;
   hand?: [number, number]; elbow?: [number, number]; arm?: 'rest' | 'raise';
 };
 
@@ -102,40 +103,37 @@ export const Person: React.FC<PersonP> = (p) => {
       <path d="M-14 -228 L16 -228 L16 -188 Q16 -178 3 -178 Q-14 -178 -14 -190 Z"
         fill={skin} stroke={O} strokeWidth={4} strokeLinejoin="round" />
 
-      {/* Head and face */}
-      <circle cx={6} cy={-272} r={62} fill={skin} stroke={O} strokeWidth={4} />
-      <ellipse cx={-16} cy={-262} rx={13} ry={19} fill={ear} stroke={O} strokeWidth={3} />
-      <path d="M-58 -282 Q-46 -346 14 -340 Q68 -334 70 -284 Q40 -308 -12 -300 Z"
-        fill={hair} stroke={O} strokeWidth={3} />
-      {blink ? (
-        <path d="M24 -278 Q36 -272 48 -278" stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />
-      ) : (
-        <>
-          <circle cx={36} cy={-278} r={13} fill="#fff" stroke={O} strokeWidth={3} />
-          <circle cx={40} cy={-278} r={6} fill={O} />
-        </>
-      )}
-      {sad ? (
-        <path d="M24 -296 L50 -306" stroke={O} strokeWidth={4} strokeLinecap="round" />
-      ) : (
-        <path d="M26 -300 Q38 -308 50 -300" stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />
-      )}
-      {glasses && (
-        <>
-          <circle cx={38} cy={-278} r={21} fill="#ffffff22" stroke={O} strokeWidth={3} />
-          <path d="M17 -280 L-8 -286" stroke={O} strokeWidth={3} />
-        </>
-      )}
-      {mustache && <path d="M48 -256 Q62 -266 76 -256 Q62 -250 48 -256 Z" fill={mustache} stroke={O} strokeWidth={2} />}
-      {mouth ? (
-        <ellipse cx={60} cy={-240} rx={8} ry={11} fill="#3b1a14" />
-      ) : smile ? (
-        <path d="M44 -242 Q58 -226 72 -244" stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />
-      ) : sad ? (
-        <path d="M48 -236 Q58 -246 68 -236" stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />
-      ) : (
-        <path d="M48 -242 Q58 -237 66 -243" stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />
-      )}
+      {/* Expressive two-eye face rig. All features move together for subtle head acting. */}
+      <g transform={`translate(0,${idle}) rotate(${headTilt},6,-272)`}>
+        <circle cx={6} cy={-272} r={62} fill={skin} stroke={O} strokeWidth={4} />
+        <ellipse cx={-52} cy={-262} rx={13} ry={19} fill={ear} stroke={O} strokeWidth={3} />
+        <ellipse cx={64} cy={-262} rx={13} ry={19} fill={ear} stroke={O} strokeWidth={3} />
+        <path d="M-58 -282 Q-46 -346 14 -340 Q68 -334 70 -284 Q40 -308 -12 -300 Z" fill={hair} stroke={O} strokeWidth={3} />
+        <path d="M-47 -302 Q-14 -326 22 -312 Q42 -305 57 -292" fill="none" stroke="#ffffff25" strokeWidth={3} strokeLinecap="round" />
+        {[-20, 34].map((cx, i) => (
+          <g key={i}>
+            {blink ? <path d={`M${cx-12} -278 Q${cx} -271 ${cx+12} -278`} stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" /> : (
+              <>
+                <ellipse cx={cx} cy={-278} rx={13} ry={16} fill="#fff" stroke={O} strokeWidth={3} />
+                <circle cx={cx + 3 + gaze} cy={-277} r={6.5} fill={O} />
+                <circle cx={cx + 1 + gaze} cy={-280} r={2} fill="#fff" />
+              </>
+            )}
+            <path d={expression === 'angry' ? `M${cx-14} -300 L${cx+12} -307` : expression === 'sad' ? `M${cx-13} -306 Q${cx} -298 ${cx+13} -306` : `M${cx-13} -301 Q${cx} -309 ${cx+13} -301`} stroke={O} strokeWidth={4.5} fill="none" strokeLinecap="round" />
+            {glasses && <ellipse cx={cx} cy={-278} rx={21} ry={23} fill="#ffffff18" stroke={O} strokeWidth={3} />}
+          </g>
+        ))}
+        <path d="M6 -270 Q-1 -250 5 -246" stroke={O} strokeWidth={3} fill="none" strokeLinecap="round" />
+        {mustache && <path d="M-8 -244 Q2 -255 12 -246 Q23 -255 34 -244 Q20 -235 12 -241 Q3 -235 -8 -244Z" fill={mustache} stroke={O} strokeWidth={2} />}
+        {(() => {
+          const shape = mouthShape ?? (mouth ? 'wide' : smile || expression === 'happy' ? 'smile' : expression === 'surprised' ? 'round' : 'closed');
+          if (shape === 'wide') return <ellipse cx={6} cy={-232} rx={13} ry={10} fill="#351713" stroke={O} strokeWidth={2.5} />;
+          if (shape === 'small') return <ellipse cx={6} cy={-235} rx={8} ry={5} fill="#351713" stroke={O} strokeWidth={2} />;
+          if (shape === 'round') return <ellipse cx={6} cy={-234} rx={8} ry={11} fill="#351713" stroke={O} strokeWidth={2.5} />;
+          if (shape === 'smile') return <path d="M-10 -238 Q6 -220 22 -238" stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />;
+          return <path d={sad || expression === 'sad' ? "M-8 -232 Q6 -242 20 -232" : "M-8 -237 Q6 -231 20 -237"} stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" />;
+        })()}
+      </g>
 
       {/* Arm is layered over torso; mitten-shaped palm has no individual fingers. */}
       <polyline points={armPts} fill="none" stroke={O} strokeWidth={46} strokeLinecap="round" strokeLinejoin="round" />
