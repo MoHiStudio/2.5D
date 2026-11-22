@@ -11,6 +11,7 @@ export type PersonP = {
   mouth?: boolean; mouthShape?: 'closed' | 'small' | 'wide' | 'round' | 'smile';
   smile?: boolean; sad?: boolean; blink?: boolean; expression?: 'neutral' | 'happy' | 'sad' | 'angry' | 'surprised' | 'thinking'; gaze?: number;
   hand?: [number, number]; elbow?: [number, number]; arm?: 'rest' | 'raise';
+  gesture?: 'rest' | 'talk' | 'wave' | 'point';
 };
 
 /**
@@ -24,14 +25,21 @@ export const Person: React.FC<PersonP> = (p) => {
   const {
     x, y, s = 1, flip, pose = 'sit', skin, ear, shirt, pants, hair,
     long, lungi, glasses, mustache, mouth, mouthShape, smile, sad, blink,
-    arm = 'rest', expression = 'neutral', gaze = 0
+    arm = 'rest', expression = 'neutral', gaze = 0, gesture = 'rest'
   } = p;
   const frame = useCurrentFrame();
   const idle = Math.sin(frame / 18) * 1.15;
   const headTilt = Math.sin(frame / 42) * 1.1;
+  const autoBlink = frame % 137 < 4 || frame % 137 === 4;
+  const eyeClosed = Boolean(blink) || autoBlink;
+  const gestureCycle = frame / 8;
+  const gestureLift = gesture === 'wave' ? 18 + Math.sin(gestureCycle) * 10 : gesture === 'talk' ? Math.max(0, Math.sin(gestureCycle)) * 13 : 0;
+  const gestureSway = gesture === 'talk' ? Math.sin(gestureCycle * 0.72) * 9 : gesture === 'wave' ? Math.sin(gestureCycle) * 8 : 0;
   const sit = pose === 'sit';
-  const hand = p.hand ?? (sit ? [128, -126] : arm === 'raise' ? [120, -150] : [18, -30]);
-  const elbow = p.elbow ?? (sit ? [62, -96] : arm === 'raise' ? [64, -112] : [10, -90]);
+  const baseHand = p.hand ?? (sit ? [128, -126] : arm === 'raise' ? [120, -150] : [18, -30]);
+  const baseElbow = p.elbow ?? (sit ? [62, -96] : arm === 'raise' ? [64, -112] : [10, -90]);
+  const hand: [number, number] = [baseHand[0] + gestureSway, baseHand[1] - gestureLift];
+  const elbow: [number, number] = [baseElbow[0] + gestureSway * 0.55, baseElbow[1] - gestureLift * 0.55];
   const armPts = `0,-160 ${elbow[0]},${elbow[1]} ${hand[0]},${hand[1]}`;
   const torsoBottom = long && !sit ? 118 : 18;
 
@@ -116,7 +124,7 @@ export const Person: React.FC<PersonP> = (p) => {
         <path d="M-47 -302 Q-14 -326 22 -312 Q42 -305 57 -292" fill="none" stroke="#ffffff25" strokeWidth={3} strokeLinecap="round" />
         {[-20, 34].map((cx, i) => (
           <g key={i}>
-            {blink ? <path d={`M${cx-12} -278 Q${cx} -271 ${cx+12} -278`} stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" /> : (
+            {eyeClosed ? <path d={`M${cx-12} -278 Q${cx} -271 ${cx+12} -278`} stroke={O} strokeWidth={4} fill="none" strokeLinecap="round" /> : (
               <>
                 <ellipse cx={cx} cy={-278} rx={13} ry={16} fill="#fff" stroke={O} strokeWidth={3} />
                 <circle cx={cx + 3 + gaze} cy={-277} r={6.5} fill={O} />
