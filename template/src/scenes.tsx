@@ -46,8 +46,8 @@ export const S1: React.FC<SP> = ({ t0, dur }) => {
       ))}
       <rect x={30} y={470} width={170} height={190} rx={34} fill="#96A5AB" />
       <rect x={340} y={470} width={170} height={190} rx={34} fill="#a9a08a" />
-      <Person x={112} y={520 + breathe(f)} s={0.82} {...TANVIR} blink={blinkAt(f)} mouth={mouthOpen('tanvir', t)} mouthShape={mouthShapeFor('tanvir', t)} />
-      <Person x={428} y={520 + breathe(f + 20)} s={0.82} flip {...SHUVO} blink={blinkAt(f + 40)} mouth={mouthOpen('shuvo', t)} mouthShape={mouthShapeFor('shuvo', t)} smile={t > 10.48 && t < 12.0} />
+      <Person x={112} y={520 + breathe(f)} s={0.82} {...TANVIR} blink={blinkAt(f)} mouth={mouthOpen('tanvir', t)} mouthShape={mouthShapeFor('tanvir', t)} gesture="talk" />
+      <Person x={428} y={520 + breathe(f + 20)} s={0.82} flip {...SHUVO} blink={blinkAt(f + 40)} mouth={mouthOpen('shuvo', t)} mouthShape={mouthShapeFor('shuvo', t)} smile={t > 10.48 && t < 12.0} gesture="talk" />
       <rect x={196} y={500} width={150} height={14} rx={5} fill="#6B4A32" stroke={O} strokeWidth={3} />
       <rect x={256} y={514} width={30} height={190} fill="#5a3d28" />
       {[222, 298].map((x, i) => (
@@ -79,7 +79,7 @@ export const S2: React.FC<SP> = ({ t0, dur }) => {
       <rect x={0} y={606} width={540} height={8} fill="#a39475" />
       <rect x={262} y={250} width={10} height={360} fill="#4a3a2e" />
       <rect x={236} y={250} width={62} height={8} fill="#4a3a2e" />
-      <Person x={120} y={520 + breathe(f)} s={0.8} pose="stand" {...(CHACHA as PersonP)} blink={blinkAt(f)} mouth={mouthOpen('chacha', t)} mouthShape={mouthShapeFor('chacha', t)} />
+      <Person x={120} y={520 + breathe(f)} s={0.8} pose="stand" {...(CHACHA as PersonP)} blink={blinkAt(f)} mouth={mouthOpen('chacha', t)} mouthShape={mouthShapeFor('chacha', t)} gesture="talk" />
       <Person x={415} y={520 + breathe(f + 15)} s={0.8} pose="stand" flip {...TANVIR} blink={blinkAt(f + 30)} sad={t > 17.8} />
       {t > 17.3 && <Bubble x={200} y={238} text="?" w={54} delay={lf(17.36)} />}
     </Stage>
@@ -200,7 +200,7 @@ export const S8: React.FC<SP> = ({ t0, dur }) => {
       <RoomLiving />
       <rect x={290} y={440} width={190} height={210} rx={34} fill="#8c6a4f" />
       <Person x={410} y={540 + breathe(f)} s={0.8} flip {...FATHER} blink={blinkAt(f)} smile={t > 46.9} />
-      <Person x={100} y={520 + breathe(f + 12)} s={0.8} pose="stand" {...TANVIR} blink={blinkAt(f + 30)} smile={t > 46.9} arm="raise" hand={[130, -150]} elbow={[64, -112]} />
+      <Person x={100} y={520 + breathe(f + 12)} s={0.8} pose="stand" {...TANVIR} blink={blinkAt(f + 30)} smile={t > 46.9} arm="raise" gesture="wave" hand={[130, -150]} elbow={[64, -112]} />
       <g transform="translate(214,386) rotate(-8)">
         <rect width={52} height={66} rx={5} fill="#F6EFE8" stroke={O} strokeWidth={3} />
         <rect x={8} y={12} width={36} height={6} rx={3} fill="#cdbfa8" /><rect x={8} y={28} width={26} height={6} rx={3} fill="#cdbfa8" />
