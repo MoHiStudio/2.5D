@@ -12,15 +12,24 @@ export const mouthOpen = (who: string, t: number) => {
   return (RMS[Math.floor(t * 30)] ?? 0) > 0.2;
 };
 
-/** Approximate audio-reactive mouth pose. This is amplitude-driven, not phoneme recognition. */
+/** Smoothed audio-reactive mouth poses. Amplitude-based approximation, not phoneme recognition. */
 export const mouthShapeFor = (who: string, t: number): 'closed' | 'small' | 'wide' | 'round' => {
   const windows = SPEAK[who] || [];
   if (!windows.some(([a, b]) => t >= a && t <= b)) return 'closed';
-  const level = RMS[Math.max(0, Math.floor(t * FPS))] ?? 0;
-  if (level < 0.12) return 'closed';
-  if (level < 0.25) return 'small';
-  const phase = Math.floor(t * 7) % 4;
-  return phase === 0 ? 'round' : level > 0.48 ? 'wide' : 'small';
+
+  const index = Math.max(0, Math.floor(t * FPS));
+  // A short local envelope avoids one-frame flicker in the mouth pose.
+  const samples = [RMS[index - 1] ?? 0, RMS[index] ?? 0, RMS[index + 1] ?? 0];
+  const level = samples[0] * 0.22 + samples[1] * 0.56 + samples[2] * 0.22;
+  if (level < 0.105) return 'closed';
+  if (level < 0.23) return 'small';
+
+  // Vary open shapes smoothly with the audio envelope; this is deliberately
+  // described as approximate because RMS cannot identify Bengali phonemes.
+  const pulse = Math.sin((t * 8.5) + index * 0.035);
+  if (level > 0.52 && pulse > 0.05) return 'wide';
+  if (pulse < -0.42) return 'round';
+  return 'small';
 };
 
 export type SP = { t0: number; dur: number };
