@@ -23,8 +23,12 @@ export type PersonP = {
 export const Person: React.FC<PersonP> = (p) => {
   const {
     x, y, s = 1, flip, pose = 'sit', skin, ear, shirt, pants, hair,
-    long, lungi, glasses, mustache, mouth, smile, sad, blink, arm = 'rest'
+    long, lungi, glasses, mustache, mouth, mouthShape, smile, sad, blink,
+    arm = 'rest', expression = 'neutral', gaze = 0
   } = p;
+  const frame = useCurrentFrame();
+  const idle = Math.sin(frame / 18) * 1.15;
+  const headTilt = Math.sin(frame / 42) * 1.1;
   const sit = pose === 'sit';
   const hand = p.hand ?? (sit ? [128, -126] : arm === 'raise' ? [120, -150] : [18, -30]);
   const elbow = p.elbow ?? (sit ? [62, -96] : arm === 'raise' ? [64, -112] : [10, -90]);
